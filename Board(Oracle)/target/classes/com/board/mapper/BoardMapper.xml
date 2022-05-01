@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.board.mapper.BoardMapper">
+ 	 <!-- 게시판 등록 -->
+    <insert id="enroll">
+        
+        insert into board(bno,title,content,writer) values(board_seq.nextval,#{title}, #{content}, #{writer})
+    </insert>
+ 
+ 	 <!-- 게시판 목록 -->
+    <select id="getList" resultType="com.board.model.BoardVO">
+    
+        select * from board order by bno DESC
+    
+    </select>
+    <!-- 위와 다름 -->
+    <!--  게시판 목록 페이징 적용 중요! --> <!-- criteria의 pagenum, amount가 그때그때 정해짐 -->
+    <select id ="getListPaging" resultType="com.board.model.BoardVO">
+    	<![CDATA[
+        select bno, title, content, writer, regdate, updatedate from(
+        
+                select /*+INDEX_DESC(board pk_board) */ rownum  as rn, bno, title, content, writer, regdate, updatedate
+                  
+                from board where rownum <= #{pageNum} * #{amount}) 
+                
+        where rn > (#{pageNum} -1) * #{amount}
+       ]]>
+        <!-- cri의 pagenum, amount가 그때그때 정해짐 -->
+    </select>
+        
+    
+    <!-- pagemaker의 글전체개수 메소드 -->
+   <select id="getTotal" resultType="int">
+    
+        select count(*) from board
+    
+    </select>
+    
+    
+    
+    
+    <!--  게시판 조회  -->
+    <select id="getPage" resultType="com.board.model.BoardVO">
+    	select * from board where bno = #{bno}
+    </select>
+       
+    <!-- 게시판 수정 -->
+    <update id="modify">
+        <!-- Oracle -->    
+        update board set title = #{title}, content = #{content}, updatedate = sysdate where bno = #{bno}
+    </update>
+     
+    <!--  게시판 삭제  -->
+    <delete id="delete">
+    
+       delete from board where bno = #{bno}
+    
+    </delete>
+        
+     
+     
+  </mapper>
